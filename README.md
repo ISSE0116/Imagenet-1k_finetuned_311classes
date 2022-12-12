@@ -7,3 +7,5 @@ I use ImageNet-1k_ILSVRC2012 downloading from URL: https://www.kaggle.com/c/imag
 
 # About finetuing
 I finetuned from 1000 to 311classes exsisting indoor situatiion. Choosed class's detail is written to "311classes.txt". Please cheack it.
+
+# TBA......
