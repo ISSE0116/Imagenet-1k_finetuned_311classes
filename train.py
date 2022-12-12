@@ -17,17 +17,24 @@ import os
 import copy
 import math
 import datetime
+import sys
 
 plt.ion()
 
 #読み取る画像ディレクトリ指定
 data_dir = '../dataset/valval/train'
 
+batch_size = int(sys.argv[1]) 
+num_epochs = int(sys.argv[2])
+lr = float(sys.argv[3])
+cuda_num = sys.argv[4]
+
 #####パラメータ設定#####
-batch_size =256 
-num_epochs = 25
-lr = 0.005
-step_size = num_epochs - 5 
+#batch_size = 256 
+#num_epochs = 25  
+#lr = 0.005
+step_size = int(num_epochs * 0.9)
+wd = 0.00001 
 ########################
 
 #lossとaccの遷移を記録、グラフに使う
@@ -58,14 +65,15 @@ image_datasets = datasets.ImageFolder(data_dir,data_transforms['train'])
 train_size = int(0.8 * len(image_datasets))
 val_size = len(image_datasets) - train_size
 train, val = torch.utils.data.random_split(image_datasets, [train_size, val_size])
-print()
+print("\n\n\n\n")
 print("[ABOUT]")
-print("###################################################################")
-print(f"full: {len(image_datasets)} -> train: {len(train)}, validation: {len(val)}")
-print("###################################################################")
+print("\033[34m###################################################################\033[0m")
+print(f"\033[34mfull: {len(image_datasets)} -> train: {len(train)}, validation: {len(val)}\033[0m")
+print("\033[34m###################################################################\033[0m")
 
-print("batch_size: {}, num_epoch: {}, lr(Initial): {}, step_size: {}".format(batch_size, num_epochs, lr, step_size))
-print("###################################################################")
+print("\033[34mlr(Initial): {}, batch_size: {}, num_epoch: {}, step_size: {}, weight_decay: {}\033[0m".format(lr, batch_size, num_epochs, step_size, wd))
+print("\033[34m###################################################################\033[0m")
+print("\n\n\n\n")
 
 train_loader = torch.utils.data.DataLoader(train, batch_size, shuffle=True)
 val_loader = torch.utils.data.DataLoader(val, batch_size, shuffle=True)
@@ -76,9 +84,11 @@ val_sizes = len(val)
 dataset_sizes = {'train':train_sizes,'val':val_sizes}
 
 class_names = image_datasets.classes
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:{}".format(cuda_num) if torch.cuda.is_available() else "cpu")
 
 #visualize_trainingdataset
+best_acc = 0.0
+dt_now = 0
 
 def imshow(inp, title=None):
     inp = inp.numpy().transpose((1, 2, 0))
@@ -91,7 +101,7 @@ def imshow(inp, title=None):
         plt.title(title)
     plt.pause(0)
 
-#Get a batch of training data
+#Get a batch of Graining data
 inputs, classes = next(iter(train))
 
 #Make a grid from batch
@@ -99,16 +109,15 @@ out = torchvision.utils.make_grid(inputs)
 
 #imshow(out, title=[class_names[x] for x in classes])
 
-##########################training models##############################
+##########################training moGels##############################
 def train_model(model, criterin, optimizer, scheduler, num_epochs):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
-    best_acc = 0.0
 
     i = 1
     
-    global loss_t,loss_v,acc_t,acc_v
+    global loss_t, loss_v, acc_t, acc_v, best_acc, dt_now
 
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch+1, num_epochs))
@@ -153,11 +162,14 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
                 epoch_acc_v = running_corrects.double() / dataset_sizes['val']
                 loss_v.append(epoch_loss_v)
                 acc_v.append(epoch_acc_v.item())
-                print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss_v, epoch_acc_v))
-             
-            if phase == 'val' and epoch_acc_v > best_acc:
-                best_acc = epoch_acc_v
-                best_models_wts = copy.deepcopy(model.state_dict())
+                print('{} Loss: {:.4f} '.format(phase, epoch_loss_v), end = '')
+
+                if epoch_acc_v > best_acc:
+                    best_acc = epoch_acc_v
+                    best_models_wts = copy.deepcopy(model.state_dict())
+                    print('\033[32mAcc: {:.4f}\033[0m'.format(epoch_acc_v))
+                else:
+                    print('Acc: {:.4f}'.format(epoch_acc_v))
 
         print()
 
@@ -166,7 +178,9 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     print('Best val Acc: {:4f}'.format(best_acc))
     
     dt_now = datetime.datetime.now()
-    model_path = 'model_path_' + str(dt_now)
+    dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
+
+    model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
     torch.save(model.state_dict(), os.path.join('weight_finetuing_path', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
@@ -210,7 +224,7 @@ num_ftrs = model_ft.fc.in_features                                              
 model_ft.fc = nn.Linear(num_ftrs, 311)                                                 #出力層を311classに変更
 model_ft = model_ft.to(device)                                                         #GPUに送信
 criterion = nn.CrossEntropyLoss()                                                      #損失関数定義(分類なのでクロスエントロピー)
-optimizer_ft = optim.SGD(model_ft.parameters(), lr, momentum=0.9, weight_decay=0.0001) #最適化手法(SGD)
+optimizer_ft = optim.SGD(model_ft.parameters(), lr, momentum=0.9, weight_decay=wd) #最適化手法(SGD)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size, gamma=0.1)             #スケジューラー
 
 #model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
@@ -229,16 +243,20 @@ ax2.plot(range(len(acc_t)), acc_t, label="Acc(Train)")
 ax2.plot(range(len(acc_v)), acc_v, label="Acc(Val)")
 ax1.legend()
 ax2.legend()
+plt.title('size[ [train]:{}  [val]:{} ]  [lr]:{}  [batch_size]:{}  [epoch]:{}  [best_acc_val]:{}'.format(train_sizes, val_sizes, lr, batch_size, num_epochs, round(best_acc.item(),3)), loc = 'right', y = 1.05, weight = 1000, color = 'green')
 
 ax1.set_ylim(0,7)
 ax2.set_ylim(0,1)
+ax1.set_yticks([0,1,2,3,4,5,6,7])
 ax2.set_yticks([0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0])
+ax1.grid(which = "major", axis = "y", color = "black", alpha = 0.8, linestyle = "--", linewidth = 0.5)
 ax2.grid(which = "major", axis = "y", color = "black", alpha = 0.8, linestyle = "--", linewidth = 0.5)
 ax1.set_xlabel("Epochs")
 ax1.set_ylabel("Loss")
 ax2.set_xlabel("Epochs")
 ax2.set_ylabel("Acc")
-plt.savefig('train_result_graph')
+graph = 'train_result_graph_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now + '.png' 
+plt.savefig(os.path.join("./graph/", graph))
 
 print()
 print("!!!!!end_to_plot_graph!!!!!")

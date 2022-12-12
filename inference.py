@@ -1,7 +1,7 @@
 ################################
 #                              #
 #          Fine-Tuning         #
-#                              #
+#           Inference          #
 ################################
 
 from __future__ import print_function, division
