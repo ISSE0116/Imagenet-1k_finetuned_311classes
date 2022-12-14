@@ -23,15 +23,16 @@ import sys
 from PIL import Image
 import json
 
-path = sys.argv[1]
-input_path = sys.argv[2]
+#path = sys.argv[1]
+input_path = sys.argv[1]
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-PATH = os.path.join('./weight_finetuing_path', path)
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#PATH = os.path.join('./weight_finetuing_path', path)
 model_ft = models.resnet18(pretrained=True)
-num_ftrs = model_ft.fc.in_features
-model_ft.fc = nn.Linear(num_ftrs, 311)
-model_ft = model_ft.to(device)
+#num_ftrs = model_ft.fc.in_features
+#model_ft.fc = nn.Linear(num_ftrs, 311)
+model_ft.to(device)
+#model_ft.cuda()
 print("学習済み重みをロードしました")
 
 file_path = os.path.join('./input', input_path)
@@ -40,19 +41,27 @@ img = Image.open(file_path)
 #height, width, channels = img.shape
 
 plt.imshow(img)
-plt.show()
+#plt.show()
 
 #Load modelpath
-model_ft.load_state_dict(torch.load(PATH, map_location = device))
+#model_ft.load_state_dict(torch.load(PATH, map_location = device))
 model_ft.eval()
 
 #ILSVRC_class_index = json.load(open('./data/imagenet_class_index.json', 'r'))
 #predictor = ILSVRPredictor(ILSVRC_class_index)
 
-print(img.size())
-inputs = img.unsqueeze_(0)
+print(img)
+transform = transforms.Compose([
+    transforms.ToTensor(),
+])
+
+inp = transform(img)
+print(inp.size())
+inputs = inp[None]
+print(inputs.size())
+inputs.to(device)
+#inputs.cuda()
 
 out = model_ft(inputs)
 result = predictor.predict_max(out)
-
 print(result)

@@ -22,7 +22,7 @@ import sys
 plt.ion()
 
 #読み取る画像ディレクトリ指定
-data_dir = '../dataset/valval/train'
+data_dir = '../dataset/valval/train2'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -34,7 +34,7 @@ cuda_num = sys.argv[4]
 #num_epochs = 25  
 #lr = 0.005
 step_size = int(num_epochs * 0.9)
-wd = 0.00001 
+wd = 0.0001 
 ########################
 
 #lossとaccの遷移を記録、グラフに使う
@@ -113,10 +113,10 @@ out = torchvision.utils.make_grid(inputs)
 def train_model(model, criterin, optimizer, scheduler, num_epochs):
     since = time.time()
 
-    best_model_wts = copy.deepcopy(model.state_dict())
-
     i = 1
     
+    best_models_wts = copy.deepcopy(model.state_dict())
+
     global loss_t, loss_v, acc_t, acc_v, best_acc, dt_now
 
     for epoch in range(num_epochs):
@@ -181,7 +181,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(model.state_dict(), os.path.join('weight_finetuing_path', model_path))
+    torch.save(best_models_wts, os.path.join('weight_finetuing_path', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
@@ -243,7 +243,7 @@ ax2.plot(range(len(acc_t)), acc_t, label="Acc(Train)")
 ax2.plot(range(len(acc_v)), acc_v, label="Acc(Val)")
 ax1.legend()
 ax2.legend()
-plt.title('size[ [train]:{}  [val]:{} ]  [lr]:{}  [batch_size]:{}  [epoch]:{}  [best_acc_val]:{}'.format(train_sizes, val_sizes, lr, batch_size, num_epochs, round(best_acc.item(),3)), loc = 'right', y = 1.05, weight = 1000, color = 'green')
+plt.title('size[ [train]:{}  [val]:{} ]  [lr]:{}  [batch_size]:{}  [epoch]:{}  [best_acc_val]:{}'.format(train_sizes, val_sizes, lr, batch_size, num_epochs, round(best_acc,3)), loc = 'right', y = 1.05, weight = 1000, color = 'green')
 
 ax1.set_ylim(0,7)
 ax2.set_ylim(0,1)
