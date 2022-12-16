@@ -182,7 +182,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('weight_finetuing_path', model_path))
+    torch.save(best_models_wts, os.path.join('weight_finetuning_path', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
