@@ -8,4 +8,20 @@ I use ImageNet-1k_ILSVRC2012 downloading from URL: https://www.kaggle.com/c/imag
 # About finetuning
 I finetuned from 1000 to 311classes exsisting indoor situation. Choosed class's detail is written to "311classes.txt". Please cheack it.
 
+# Explain sample script
+- ***train.py***  
+ You have to pecify the number of batches, learning rate, number of epochs, and cuda number as arguments when executing this script.
+```
+python3 train.py 450 0.001 100 0
+```
+
+- ***train_aug.py***  
+ 
+```
+python3 train_aug.py 450 0.001 100 0
+```
+- ***inference.py***  
+```
+python3 inference.py [model_path]
+```
 # TBA...
