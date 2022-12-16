@@ -22,7 +22,7 @@ import sys
 plt.ion()
 
 #読み取る画像ディレクトリ指定
-data_dir = '../dataset/valval/train2'
+data_dir = '../dataset/valval/train'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -65,15 +65,15 @@ image_datasets = datasets.ImageFolder(data_dir,data_transforms['train'])
 train_size = int(0.8 * len(image_datasets))
 val_size = len(image_datasets) - train_size
 train, val = torch.utils.data.random_split(image_datasets, [train_size, val_size])
-print("\n\n\n\n")
+print("\n\n\n")
 print("[ABOUT]")
-print("\033[34m###################################################################\033[0m")
-print(f"\033[34mfull: {len(image_datasets)} -> train: {len(train)}, validation: {len(val)}\033[0m")
-print("\033[34m###################################################################\033[0m")
+print("\033[32m###################################################################\033[0m")
+print(f"\033[32mfull: {len(image_datasets)} -> train: {len(train)}, validation: {len(val)}\033[0m")
+print("\033[32m###################################################################\033[0m")
 
-print("\033[34mlr(Initial): {}, batch_size: {}, num_epoch: {}, step_size: {}, weight_decay: {}\033[0m".format(lr, batch_size, num_epochs, step_size, wd))
-print("\033[34m###################################################################\033[0m")
-print("\n\n\n\n")
+print("\033[32mlr(Initial): {}, batch_size: {}, num_epoch: {}, step_size: {}, weight_decay: {}\033[0m".format(lr, batch_size, num_epochs, step_size, wd))
+print("\033[32m###################################################################\033[0m")
+print("\n\n\n")
 
 train_loader = torch.utils.data.DataLoader(train, batch_size, shuffle=True)
 val_loader = torch.utils.data.DataLoader(val, batch_size, shuffle=True)
@@ -181,7 +181,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('weight_finetuing_path', model_path))
+    torch.save(best_models_wts, os.path.join('weight_finetuning_path', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
@@ -224,7 +224,7 @@ num_ftrs = model_ft.fc.in_features                                              
 model_ft.fc = nn.Linear(num_ftrs, 311)                                                 #出力層を311classに変更
 model_ft = model_ft.to(device)                                                         #GPUに送信
 criterion = nn.CrossEntropyLoss()                                                      #損失関数定義(分類なのでクロスエントロピー)
-optimizer_ft = optim.SGD(model_ft.parameters(), lr, momentum=0.9, weight_decay=wd) #最適化手法(SGD)
+optimizer_ft = optim.SGD(model_ft.parameters(), lr, momentum=0.9, weight_decay=wd)     #最適化手法(SGD)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size, gamma=0.1)             #スケジューラー
 
 #model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
