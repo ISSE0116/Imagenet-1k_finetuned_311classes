@@ -10,7 +10,7 @@ I finetuned from 1000 to 311classes exsisting indoor situation. Choosed class's 
 
 # Explain sample script
 - ***train.py***  
- You have to pecify the number of batches, learning rate, number of epochs, and cuda number as arguments when executing this script.
+ You have to specify the number of batches, learning rate, number of epochs, and cuda number as arguments when executing this script.
 ```
 python3 train.py 450 0.001 100 0
 ```
