@@ -22,7 +22,8 @@ import sys
 plt.ion()
 
 #読み取る画像ディレクトリ指定
-data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
+#data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
+data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -72,7 +73,7 @@ print("\033[32m#################################################################
 print(f"\033[32mfull: {len(image_datasets)} -> train: {len(train)}, validation: {len(val)}\033[0m")
 print("\033[32m###################################################################\033[0m")
 
-print("\033[32mlr(Initial): {}, batch_size: {}, num_epoch: {}, step_size: {}, weight_decay: {}\033[0m".format(lr, batch_size, num_epochs, step_size, wd))
+print("\033[32mlr(Initial): {}, batch_size: {}, num_epoch: {}, step_size: {}, weight_decay: {}\033[0m".fgrmat(lr, batch_size, num_epochs, step_size, wd))
 print("\033[32m###################################################################\033[0m")
 print("\n\n\n")
 
@@ -183,7 +184,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('weight_finetuning_path_101', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_50', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model

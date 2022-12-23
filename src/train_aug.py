@@ -1,7 +1,7 @@
 ################################
 #                              #
 #          Fine-Tuning         #
-#           Training           #
+#         Training_aug         #
 ################################
 from __future__ import print_function, division
 import torch
@@ -22,7 +22,8 @@ import sys
 plt.ion()
 
 #読み取る画像ディレクトリ指定
-data_dir = '../dataset/valval/train'
+data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
+#data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -49,14 +50,14 @@ data_transforms = {
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-        transforms.RandomHorizontalFlip(p=0.8)
+        transforms.RandomHorizontalFlip(p=0.5)
     ]),
     'val': transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-        transforms.RandomHorizontalFlip(p=0.8)
+        transforms.RandomHorizontalFlip(p=0.5)
     ]),
 }
 
@@ -141,6 +142,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
                 optimizer.zero_grad()
                 
                 with torch.set_grad_enabled(phase == 'train'): #train時のみ勾配の算出をオンにするの意
+                    #m = nn.dropout(inputs)
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
                     loss = criterion(outputs, labels)
@@ -182,7 +184,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('weight_finetuning_path', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_resnet18', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
@@ -244,7 +246,7 @@ ax2.plot(range(len(acc_t)), acc_t, label="Acc(Train)")
 ax2.plot(range(len(acc_v)), acc_v, label="Acc(Val)")
 ax1.legend()
 ax2.legend()
-plt.title('size[ [train]:{}  [val]:{} ]  [lr]:{}  [batch_size]:{}  [epoch]:{}  [best_acc_val]:{}'.format(train_sizes, val_sizes, lr, batch_size, num_epochs, round(best_acc,3)), loc = 'right', y = 1.05, weight = 1000, color = 'green')
+plt.title('size[ [train]:{}  [val]:{} ]  [lr]:{}  [batch_size]:{}  [epoch]:{}  [best_acc_val]:{:.3f}'.format(train_sizes, val_sizes, lr, batch_size, num_epochs, best_acc), loc = 'right', y = 1.05, weight = 1000, color = 'green')
 
 ax1.set_ylim(0,7)
 ax2.set_ylim(0,1)

@@ -23,7 +23,7 @@ plt.ion()
 
 #読み取る画像ディレクトリ指定
 #data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
-data_dir = '../dataset/valval/train'
+data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -184,7 +184,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('weight_finetuning_path_101', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_101', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model

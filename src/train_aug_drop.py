@@ -1,13 +1,14 @@
 ################################
 #                              #
 #          Fine-Tuning         #
-#           Training           #
+#      Training_aug_dropout    #
 ################################
 from __future__ import print_function, division
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
+import torch.nn.functional as F
 import numpy as np
 import torchvision
 from torchvision import datasets, models, transforms
@@ -22,8 +23,8 @@ import sys
 plt.ion()
 
 #読み取る画像ディレクトリ指定
-#data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
-data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
+data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
+#data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -44,19 +45,20 @@ loss_v=[]
 acc_t=[]
 acc_v=[]
 
-
 data_transforms = {
     'train': transforms.Compose([
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        transforms.RandomHorizontalFlip(p=0.5)
     ]),
     'val': transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        transforms.RandomHorizontalFlip(p=0.5)
     ]),
 }
 
@@ -102,8 +104,8 @@ def imshow(inp, title=None):
         plt.title(title)
     plt.pause(0)
 
-#Get a batch of Training data
-inputs, classes = next(iter(data_loader['train']))
+#Get a batch of Graining data
+inputs, classes = next(iter(train))
 
 #Make a grid from batch
 out = torchvision.utils.make_grid(inputs)
@@ -141,6 +143,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
                 optimizer.zero_grad()
                 
                 with torch.set_grad_enabled(phase == 'train'): #train時のみ勾配の算出をオンにするの意
+                    #m = nn.dropout(inputs)
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
                     loss = criterion(outputs, labels)
@@ -182,7 +185,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('/home/kikuchi22/Desktop/kenkyu/kikuchisan/fine-tuned/weight_finetuning_path/weight_finetuning_path_resnet18', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_resnet18', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
@@ -224,7 +227,13 @@ model_ft = models.resnet18(pretrained=True)
 num_ftrs = model_ft.fc.in_features                                                     #modelの定義
 model_ft.fc = nn.Linear(num_ftrs, 311)                                                 #出力層を311classに変更
 model_ft = model_ft.to(device)                                                         #GPUに送信
+
+model_ft.fc.register_forward_hook(lambda m, inp, out: F.dropout(out, p=0.5, training=m.training))
+print(model_ft)
 criterion = nn.CrossEntropyLoss()                                                      #損失関数定義(分類なのでクロスエントロピー)
+print(F.dropout(x, p=0.5, training=True))
+print(F.dropout(x, p=0.5, training=False))
+
 optimizer_ft = optim.SGD(model_ft.parameters(), lr, momentum=0.9, weight_decay=wd)     #最適化手法(SGD)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size, gamma=0.1)             #スケジューラー
 
@@ -256,7 +265,7 @@ ax1.set_xlabel("Epochs")
 ax1.set_ylabel("Loss")
 ax2.set_xlabel("Epochs")
 ax2.set_ylabel("Acc")
-graph = 'train_result_graph_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now + '.png' 
+graph = 'train_result_graph_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now + '_aug'  + '.png' 
 plt.savefig(os.path.join("./graph/", graph))
 
 print()
