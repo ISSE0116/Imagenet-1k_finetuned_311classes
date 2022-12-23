@@ -18,7 +18,9 @@ import os
 import sys
 
 inp_model_path = sys.argv[1]
-PATH = os.path.join('./weight_finetuning_path', inp_model_path) 
+inp_modellayer = int(sys.argv[2])
+weight_dir = '../weight_finetuning_path/weight_finetuning_path_resnet' + str(inp_modellayer)
+PATH = os.path.join(weight_dir, inp_model_path) 
 
 def get_device(use_gpu):
     if use_gpu and torch.cuda.is_available():
@@ -29,7 +31,13 @@ def get_device(use_gpu):
 
 device = get_device(use_gpu=True)
 
-model = models.resnet18(pretrained=True)
+if(inp_modellayer == 18):
+    model = models.resnet18(pretrained=True)
+if(inp_modellayer == 50):
+    model = models.resnet50(pretrained=True)
+if(inp_modellayer == 101):
+    model = models.resnet101(pretrained=True)
+    
 num_ftrs = model.fc.in_features
 model.fc = nn.Linear(num_ftrs, 311)
 model.load_state_dict(torch.load(PATH, map_location = device))
@@ -70,7 +78,7 @@ class ImageFolder(Dataset):
     def __len__(self):
         return len(self.img_paths)
 
-dataset = ImageFolder("./input", transform)
+dataset = ImageFolder("../input", transform)
 dataloader = DataLoader(dataset, batch_size=8)
 
 '''
@@ -80,11 +88,12 @@ outputs = model(inputs)
 batch_probs = F.softmax(outputs, dim=1)
 batch_probs, batch_indices = batch_probs.sort(dim=1, descending=True)
 '''
+
 def get_classes():
     if not Path("data/imagenet_class_index.json").exists():
-        download_url("https://git.io/JebAs", "./data", "imagenet_class_index.json")
+        download_url("https://git.io/JebAs", "../data", "imagenet_class_index.json")
 
-    with open("data/imagenet_class_index.json") as f:
+    with open("../data/imagenet_class_index.json") as f:
         data = json.load(f)
         class_names = [x["ja"] for x in data]
 
