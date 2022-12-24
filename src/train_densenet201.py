@@ -184,7 +184,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_densenet191', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_densenet201', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
@@ -221,10 +221,10 @@ def visualize_model(model, num_images=6):
 
 #finetuning the convert
 
-model_ft = models.resnet18(pretrained=True)
+model_ft = models.densenet201(pretrained=True)
 
-num_ftrs = model_ft.fc.in_features                                                     #modelの定義
-model_ft.fc = nn.Linear(num_ftrs, 311)                                                 #出力層を311classに変更
+num_ftrs = model_ft.classifier.in_features                                                     #modelの定義
+model_ft.classifier = nn.Linear(num_ftrs, 311)                                                 #出力層を311classに変更
 model_ft = model_ft.to(device)                                                         #GPUに送信
 criterion = nn.CrossEntropyLoss()                                                      #損失関数定義(分類なのでクロスエントロピー)
 optimizer_ft = optim.SGD(model_ft.parameters(), lr, momentum=0.9, weight_decay=wd)     #最適化手法(SGD)
@@ -259,7 +259,7 @@ ax1.set_ylabel("Loss")
 ax2.set_xlabel("Epochs")
 ax2.set_ylabel("Acc")
 graph = 'train_result_graph_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now + '_aug'  + '.png' 
-plt.savefig(os.path.join("./graph/", graph))
+plt.savefig(os.path.join("../graph/", graph))
 
 print()
 print("!!!!!end_to_plot_graph!!!!!")
