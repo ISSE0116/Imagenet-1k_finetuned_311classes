@@ -15,13 +15,13 @@ I finetuned from 1000 to 311classes exsisting indoor situation. Choosed class's 
 - ***train.py***  
  You have to specify the number of batches, learning rate, number of epochs, and cuda number as arguments when executing this script.
 ```
-python3 train.py 450 0.001 100 0
+python3 train.py [batch_size] [learning_rate] [epochs] [cuda_number]
 ```
 
 - ***train_aug.py***  
  
 ```
-python3 train_aug.py 450 0.001 100 0
+python3 train_aug.py [batch_size] [learning_rate] [epochs] [cuda_number]
 ```
 - ***inference.py***  
 ```
