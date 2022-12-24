@@ -1,4 +1,5 @@
 # ImageNet-1k_finetuned_311classes
+## Abstract
 change the fc layer of the model pre-trained by ImageNet-1k from 1000 classes to 311 classes using finetuing.
 I used this website(pytorch tutorial) as a reference.  
 Be based on https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html  
