@@ -5,7 +5,7 @@ I used this website(pytorch tutorial) as a reference.
 Be based on https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html  
 
 ## Using dataset
-I use ImageNet-1k_ILSVRC2012 downloading from URL: https://www.kaggle.com/c/imagenet-object-localization-challenge
+I use ILSVRC2012 downloading from URL: https://www.kaggle.com/c/imagenet-object-localization-challenge
 ![image](https://user-images.githubusercontent.com/99160791/206960723-394c0fc7-ea59-4a68-a439-ffd12d7780a9.jpeg)
 
 ## About finetuning
