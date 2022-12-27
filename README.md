@@ -23,10 +23,10 @@ python3 train.py [batch_size] [learning_rate] [epochs] [cuda_number]
 ```
 python3 train_aug.py [batch_size] [learning_rate] [epochs] [cuda_number]
 ```
-- ***inference.py***  
+- ***inference_resnet.py***  
  You have to specify model_path finetuned as arguments when executing.
 ```
-python3 inference.py [model_path]
+python3 inference.py [model_path] [number_of_layer] [image_directory_path]
 ```
 
 
