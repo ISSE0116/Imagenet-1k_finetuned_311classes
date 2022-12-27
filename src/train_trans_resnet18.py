@@ -22,8 +22,8 @@ import sys
 plt.ion()
 
 #読み取る画像ディレクトリ指定
-#data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
-data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
+data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
+#data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -184,41 +184,15 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_resnet50_trans', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_resnet18_trans', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
 
 ############################################################################################
 
-#visualize predicted model
-
-def visualize_model(model, num_images=6): 
-    was_training = model.training
-    model.eval()
-    images_so_far = 0
-    fig = plt.figure()
-
-    with torch.no_grad():
-        for i, (inputs, labels) in enumerate(data_loader[val]):
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-
-            outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
-
-            for j in range(inputs.size()[0]):
-                images_so_far += 1
-                ax = plt.subplot(num_images// 2, 2, images_so_far)
-                ax.axis('off')
-                ax.set_title(f'predicted: {class_names[preds[j]]}')
-                imshow(inputs.cpu().data[j])
-
-                if images_so_far == num_images:
-                    model.train(mode=was_training)
-                    return
 #Convnet as fixed feature extractor
-model_conv = torchvision.models.resnet50(pretrained = True)
+model_conv = torchvision.models.resnet18(pretrained = True)
 for param in model_conv.parameters():
     param.requires_grad = False
 # Parameters of newly constructed modules have requires_grad=True by default
@@ -229,11 +203,10 @@ criterion = nn.CrossEntropyLoss()
 # Observe that only parameters of final layer are being optimized as
 # opposed to before.
 optimizer_conv = optim.SGD(model_conv.fc.parameters(), lr, momentum=0.9, weight_decay=wd)
-optimizer_conv_adam = optim.Adam(model_conv.fc.parameters(), lr, weight_decay=wd)
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv_adam, step_size, gamma=0.1) 
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv, step_size, gamma=0.1) 
 
-train_model(model_conv, criterion, optimizer_conv_adam, exp_lr_scheduler, num_epochs)
+train_model(model_conv, criterion, optimizer_conv, exp_lr_scheduler, num_epochs)
 
 
 #plot the result graph
@@ -260,7 +233,7 @@ ax1.set_ylabel("Loss")
 ax2.set_xlabel("Epochs")
 ax2.set_ylabel("Acc")
 graph = 'train_result_graph_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now + '_aug'  + '.png' 
-plt.savefig(os.path.join("../graph/resnet50_trans", graph))
+plt.savefig(os.path.join("../graph/resnet18_trans", graph))
 
 print()
 print("!!!!!end_to_plot_graph!!!!!")

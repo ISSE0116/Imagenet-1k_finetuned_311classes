@@ -19,6 +19,7 @@ import sys
 
 inp_model_path = sys.argv[1]
 inp_modellayer = int(sys.argv[2])
+img_dir = sys.argv[3]
 weight_dir = '../weight_finetuning_path/weight_finetuning_path_resnet' + str(inp_modellayer)
 PATH = os.path.join(weight_dir, inp_model_path) 
 
@@ -78,7 +79,7 @@ class ImageFolder(Dataset):
     def __len__(self):
         return len(self.img_paths)
 
-dataset = ImageFolder("../input", transform)
+dataset = ImageFolder(img_dir, transform)
 dataloader = DataLoader(dataset, batch_size=8)
 
 '''
