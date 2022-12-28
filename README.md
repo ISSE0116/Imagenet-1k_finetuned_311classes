@@ -9,7 +9,7 @@ I use ILSVRC2012 downloading from URL: https://www.kaggle.com/c/imagenet-object-
 ![image](https://user-images.githubusercontent.com/99160791/206960723-394c0fc7-ea59-4a68-a439-ffd12d7780a9.jpeg)
 
 ## About finetuning
-I finetuned from 1000 to 311classes exsisting indoor situation. Choosed class's detail is written to "myclass.txt". Please check it.
+I finetuned from 1000 to 311classes exsisting indoor situation. Choosed class's detail is written to "myclass.txt". Please check it.  
 
 ## Explain sample script
 - ***train.py***  
@@ -28,6 +28,11 @@ python3 train_aug.py [batch_size] [learning_rate] [epochs] [cuda_number]
 ```
 python3 inference.py [model_path] [number_of_layer] [image_directory_path]
 ```
+
+## Examples of progress
+ You run train_xx.py, Progress is displayed like example images.  
+![progress](assert/example_progress "progress")  
+![status](assert/example_status "status")  
 
 
 TBA...
