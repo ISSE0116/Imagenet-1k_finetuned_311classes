@@ -22,8 +22,8 @@ import sys
 plt.ion()
 
 #読み取る画像ディレクトリ指定
-data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
-#data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
+#data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
+data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -132,19 +132,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
                  
                 with torch.set_grad_enabled(phase == 'train'): #train時のみ勾配の算出をオンにするの意
                     outputs = model(inputs)
-                    #print("\033[32moutputs.shape\033[0m")
-                    #print(outputs.shape)
-                    #print("\033[32moutputs\033[0m")
-                    #print(outputs)
-                    #print("---------------------------")
-                    #print("#{}#".format(ite))
-                    #print("\033[32mlabels\033[0m")
-                    #print(labels)
-                    #print(labels.shape)
                     _, preds = torch.topk(outputs, 5, dim = 1)  #最大値(_),要素位置を返す(preds)
-                    #print("\033[32mpreds\033[0m")
-                    #print("{}".format(preds))
-                    #print("{}".format(preds.shape))
                     loss = criterion(outputs, labels)
                     #top5取得テスト
 
@@ -160,9 +148,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
                     for j in range(5):
                         if(preds[i,j] == labels.data[i]):
                             running_corrects += 1
-
-                #print("\033[32mrunning_corrects\033[0m")
-                #print(running_corrects) 
+                
                 ite += 1  
        
             if(phase == 'train'):
@@ -196,7 +182,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_resnet18_trans_top5', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_resnet50_trans_top5', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
@@ -204,7 +190,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
 ############################################################################################
 
 #Convnet as fixed feature extractor
-model_conv = torchvision.models.resnet18(pretrained = True)
+model_conv = torchvision.models.resnet50(pretrained = True)
 for param in model_conv.parameters():
     param.requires_grad = False
 # Parameters of newly constructed modules have requires_grad=True by default
@@ -246,7 +232,7 @@ ax1.set_ylabel("Loss")
 ax2.set_xlabel("Epochs")
 ax2.set_ylabel("Acc")
 graph = 'train_result_graph_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now + '_aug'  + '.png' 
-plt.savefig(os.path.join("../resnet18_trans_top5", graph))
+plt.savefig(os.path.join("../graph/resnet50_trans_top5", graph))
 
 print()
 print("!!!!!end_to_plot_graph!!!!!")
