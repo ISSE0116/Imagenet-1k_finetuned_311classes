@@ -131,7 +131,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
                 with torch.set_grad_enabled(phase == 'train'): #train時のみ勾配の算出をオンにするの意
                     #m = nn.dropout(inputs)
                     outputs = model(inputs)
-                    _, preds = torch.max(outputs, 1)
+                    _, preds = torch.max(outputs, 1)  #最大値(_),要素位置を返す(pred)
                     loss = criterion(outputs, labels)
                     i += 1
 
@@ -141,6 +141,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
 
                 running_loss += loss.item() * inputs.size(0)   #lossとbatchサイズとの掛け算
                 running_corrects += torch.sum(preds == labels.data)
+                
 
             if(phase == 'train'):
                 epoch_loss_t = running_loss / dataset_sizes['train']

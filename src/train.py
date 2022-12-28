@@ -87,20 +87,10 @@ dataset_sizes = {'train':train_sizes,'val':val_sizes}
 class_names = image_datasets.classes
 device = torch.device("cuda:{}".format(cuda_num) if torch.cuda.is_available() else "cpu")
 
-#visualize_trainingdataset
 best_acc = 0.0
 dt_now = 0
 
-def imshow(inp, title=None):
-    inp = inp.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
-    plt.imshow(inp)
-    if title is not None:
-        plt.title(title)
-    plt.pause(0)
+##########################training moGels##############################
 
 #Get a batch of Training data
 inputs, classes = next(iter(data_loader['train']))
@@ -108,9 +98,7 @@ inputs, classes = next(iter(data_loader['train']))
 #Make a grid from batch
 out = torchvision.utils.make_grid(inputs)
 
-#imshow(out, title=[class_names[x] for x in classes])
 
-##########################training moGels##############################
 def train_model(model, criterin, optimizer, scheduler, num_epochs):
     since = time.time()
 
@@ -189,34 +177,6 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
 
 ############################################################################################
 
-#visualize predicted model
-
-def visualize_model(model, num_images=6): 
-    was_training = model.training
-    model.eval()
-    images_so_far = 0
-    fig = plt.figure()
-
-    with torch.no_grad():
-        for i, (inputs, labels) in enumerate(data_loader[val]):
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-
-            outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
-
-            for j in range(inputs.size()[0]):
-                images_so_far += 1
-                ax = plt.subplot(num_images// 2, 2, images_so_far)
-                ax.axis('off')
-                ax.set_title(f'predicted: {class_names[preds[j]]}')
-                imshow(inputs.cpu().data[j])
-
-                if images_so_far == num_images:
-                    model.train(mode=was_training)
-                    return
-            model.train(mode=was_training)
-
 #finetuning the convert
 
 model_ft = models.resnet18(pretrained=True)
@@ -228,8 +188,6 @@ criterion = nn.CrossEntropyLoss()                                               
 optimizer_ft = optim.SGD(model_ft.parameters(), lr, momentum=0.9, weight_decay=wd)     #最適化手法(SGD)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size, gamma=0.1)             #スケジューラー
 
-#model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=25)
-#visualize_model(model_ft)
 
 train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler, num_epochs)
 

@@ -88,20 +88,10 @@ dataset_sizes = {'train':train_sizes,'val':val_sizes}
 class_names = image_datasets.classes
 device = torch.device("cuda:{}".format(cuda_num) if torch.cuda.is_available() else "cpu")
 
-#visualize_trainingdataset
 best_acc = 0.0
 dt_now = 0
 
-def imshow(inp, title=None):
-    inp = inp.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
-    plt.imshow(inp)
-    if title is not None:
-        plt.title(title)
-    plt.pause(0)
+##########################training moGels##############################
 
 #Get a batch of Graining data
 inputs, classes = next(iter(train))
@@ -111,7 +101,6 @@ out = torchvision.utils.make_grid(inputs)
 
 #imshow(out, title=[class_names[x] for x in classes])
 
-##########################training moGels##############################
 def train_model(model, criterin, optimizer, scheduler, num_epochs):
     since = time.time()
 
