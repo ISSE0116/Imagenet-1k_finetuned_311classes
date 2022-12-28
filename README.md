@@ -31,8 +31,8 @@ python3 inference.py [model_path] [number_of_layer] [image_directory_path]
 
 ## Examples of progress
  You run train_xx.py, Progress is displayed like example images.  
-![progress](assert/example_progress "progress")  
-![status](assert/example_status "status")  
+![progress](assert/example_progress.png "progress")  
+![status](assert/example_status.png "status")  
 
 
 TBA...
