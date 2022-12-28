@@ -6,12 +6,12 @@ Be based on https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.ht
 
 ## Using dataset
 I use ILSVRC2012 downloading from URL: https://www.kaggle.com/c/imagenet-object-localization-challenge
-![image](https://user-images.githubusercontent.com/99160791/206960723-394c0fc7-ea59-4a68-a439-ffd12d7780a9.jpeg)
+![imagenet_logo](assert/imagenet_logo.jpg "imagenet_logo")  
 
 ## About finetuning
 I finetuned from 1000 to 311classes exsisting indoor situation. Choosed class's detail is written to "myclass.txt". Please check it.  
 
-## Explain sample script
+## sample script
 - ***train.py***  
  You have to specify the number of batches, learning rate, number of epochs, and cuda number as arguments when executing.  
 ```
