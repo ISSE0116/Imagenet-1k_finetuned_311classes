@@ -18,12 +18,13 @@ import copy
 import math
 import datetime
 import sys
+from efficientnet_pytorch import EfficientNet
 
 plt.ion()
 
 #読み取る画像ディレクトリ指定
-#data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
-data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
+data_dir = '/mnt/data1/kikuchi/kikuchisan/valval/train'
+#data_dir = '/mnt/data1/kikuchi/kikuchisan/t'
 
 batch_size = int(sys.argv[1]) 
 num_epochs = int(sys.argv[2])
@@ -184,7 +185,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_densenet161_trans', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_efficientnet_b7_trans', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
@@ -192,20 +193,20 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
 ############################################################################################
 
 #Convnet as fixed feature extractor
-model_conv = torchvision.models.densenet161(pretrained = True)
+model_conv = EfficientNet.from_pretrained('efficientnet-b7') 
 for param in model_conv.parameters():
     param.requires_grad = False
 # Parameters of newly constructed modules have requires_grad=True by default
-num_ftrs = model_conv.classifier.in_features
-model_conv.classifier = nn.Linear(num_ftrs, 311)
+num_ftrs = model_conv._fc.in_features
+model_conv._fc = nn.Linear(num_ftrs, 311)
 model_conv = model_conv.to(device)
 criterion = nn.CrossEntropyLoss()
 # Observe that only parameters of final layer are being optimized as
 # opposed to before.
-optimizer_conv = optim.SGD(model_conv.classifier.parameters(), lr, momentum=0.9, weight_decay=wd)
-optimizer_conv_adam = optim.Adam(model_conv.classifier.parameters(), lr, weight_decay=wd)
+optimizer_conv = optim.SGD(model_conv._fc.parameters(), lr, momentum=0.9, weight_decay=wd)
+optimizer_conv_adam = optim.Adam(model_conv._fc.parameters(), lr, weight_decay=wd)
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv, step_size, gamma=0.1) 
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv_adam, step_size, gamma=0.1) 
 
 train_model(model_conv, criterion, optimizer_conv_adam, exp_lr_scheduler, num_epochs)
 
@@ -234,7 +235,7 @@ ax1.set_ylabel("Loss")
 ax2.set_xlabel("Epochs")
 ax2.set_ylabel("Acc")
 graph = 'train_result_graph_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now + '_aug'  + '.png' 
-plt.savefig(os.path.join("../graph/densenet161_trans", graph))
+plt.savefig(os.path.join("../graph/efficientnet_b7_trans", graph))
 
 print()
 print("!!!!!end_to_plot_graph!!!!!")
