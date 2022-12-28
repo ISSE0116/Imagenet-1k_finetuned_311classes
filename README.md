@@ -11,7 +11,7 @@ I use ILSVRC2012 downloading from URL: https://www.kaggle.com/c/imagenet-object-
 ## About finetuning
 I finetuned from 1000 to 311classes exsisting indoor situation. Choosed class's detail is written to "myclass.txt". Please check it.  
 
-## Explain sample script
+## sample script
 - ***train.py***  
  You have to specify the number of batches, learning rate, number of epochs, and cuda number as arguments when executing.  
 ```
