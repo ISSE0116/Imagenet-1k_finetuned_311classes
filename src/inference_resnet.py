@@ -26,7 +26,7 @@ PATH = os.path.join(weight_dir, inp_model_path)
 def get_device(use_gpu):
     if use_gpu and torch.cuda.is_available():
         torch.backends.cudnn.deterministic = True
-        return torch.device("cuda")
+        return torch.device("cuda:2")
     else:
         return torch.device("cpu")
 
@@ -45,7 +45,7 @@ model.load_state_dict(torch.load(PATH, map_location = device))
 
 transform = transforms.Compose(
     [
-        transforms.Resize(256),  
+        transforms.Resize(100),  
         transforms.CenterCrop(224), 
         transforms.ToTensor(), 
         transforms.Normalize(

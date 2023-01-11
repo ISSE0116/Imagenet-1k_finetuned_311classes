@@ -88,10 +88,10 @@ dataset_sizes = {'train':train_sizes,'val':val_sizes}
 class_names = image_datasets.classes
 device = torch.device("cuda:{}".format(cuda_num) if torch.cuda.is_available() else "cpu")
 
+##########################training moGels##############################
+
 best_acc = 0.0
 dt_now = 0
-
-##########################training moGels##############################
 
 #Get a batch of Graining data
 inputs, classes = next(iter(train))
@@ -99,12 +99,11 @@ inputs, classes = next(iter(train))
 #Make a grid from batch
 out = torchvision.utils.make_grid(inputs)
 
-#imshow(out, title=[class_names[x] for x in classes])
 
 def train_model(model, criterin, optimizer, scheduler, num_epochs):
     since = time.time()
 
-    i = 1
+    ite = 1
     
     best_models_wts = copy.deepcopy(model.state_dict())
 
@@ -113,7 +112,8 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch+1, num_epochs))
         print('-' * 10)
-
+        
+        
         for phase in ['train', 'val']:
             if phase == 'train':
                 scheduler.step()
@@ -127,33 +127,42 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
             for inputs, labels in data_loader[phase]:          #dataloaderからdataset呼び出し
                 inputs = inputs.to(device)                     #GPUに転送
                 labels = labels.to(device) 
-                
+
                 optimizer.zero_grad()
-                
+                 
                 with torch.set_grad_enabled(phase == 'train'): #train時のみ勾配の算出をオンにするの意
-                    #m = nn.dropout(inputs)
                     outputs = model(inputs)
-                    _, preds = torch.max(outputs, 1)
+                    _, preds = torch.topk(outputs, 5, dim = 1)  #最大値(_),要素位置を返す(preds)
                     loss = criterion(outputs, labels)
-                    i += 1
+                    #top5取得テスト
 
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
 
                 running_loss += loss.item() * inputs.size(0)   #lossとbatchサイズとの掛け算
-                running_corrects += torch.sum(preds == labels.data)
+
+                batch_num = labels.shape[0]
+                
+                for i in range(batch_num):
+                    for j in range(5):
+                        if(preds[i,j] == labels.data[i]):
+                            running_corrects += 1
+                
+                ite += 1  
+       
             if(phase == 'train'):
                 epoch_loss_t = running_loss / dataset_sizes['train']
-                epoch_acc_t = running_corrects.double() / dataset_sizes['train']
+                epoch_acc_t = running_corrects / dataset_sizes['train']
                 loss_t.append(epoch_loss_t)
-                acc_t.append(epoch_acc_t.item())
+                acc_t.append(epoch_acc_t)
                 print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss_t, epoch_acc_t))
             else:
                 epoch_loss_v = running_loss / dataset_sizes['val']
-                epoch_acc_v = running_corrects.double() / dataset_sizes['val']
+                epoch_acc_v = running_corrects / dataset_sizes['val']
+                #epoch_top5acc_t =  
                 loss_v.append(epoch_loss_v)
-                acc_v.append(epoch_acc_v.item())
+                acc_v.append(epoch_acc_v)
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss_v), end = '')
 
                 if epoch_acc_v > best_acc:
@@ -173,7 +182,7 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
     dt_now = str(dt_now.month) + str(dt_now.day) + '-' + str(dt_now.hour) + str(dt_now.minute) 
 
     model_path = 'model_path_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now
-    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_resnet18_trans', model_path))
+    torch.save(best_models_wts, os.path.join('../weight_finetuning_path/weight_finetuning_path_densenet121_trans_top5', model_path))
     print()
     print('!!!!!save_{}!!!!!'.format(model_path))
     return model
@@ -181,21 +190,22 @@ def train_model(model, criterin, optimizer, scheduler, num_epochs):
 ############################################################################################
 
 #Convnet as fixed feature extractor
-model_conv = torchvision.models.resnet18(pretrained = True)
+model_conv = torchvision.models.densenet121(pretrained = True)
 for param in model_conv.parameters():
     param.requires_grad = False
 # Parameters of newly constructed modules have requires_grad=True by default
-num_ftrs = model_conv.fc.in_features
-model_conv.fc = nn.Linear(num_ftrs, 311)
+num_ftrs = model_conv.classifier.in_features
+model_conv.classifier = nn.Linear(num_ftrs, 311)
 model_conv = model_conv.to(device)
 criterion = nn.CrossEntropyLoss()
 # Observe that only parameters of final layer are being optimized as
 # opposed to before.
-optimizer_conv = optim.SGD(model_conv.fc.parameters(), lr, momentum=0.9, weight_decay=wd)
+optimizer_conv = optim.SGD(model_conv.classifier.parameters(), lr, momentum=0.9, weight_decay=wd)
+optimizer_conv_adam = optim.Adam(model_conv.classifier.parameters(), lr, weight_decay=wd)
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv, step_size, gamma=0.1) 
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv_adam, step_size, gamma=0.1) 
 
-train_model(model_conv, criterion, optimizer_conv, exp_lr_scheduler, num_epochs)
+train_model(model_conv, criterion, optimizer_conv_adam, exp_lr_scheduler, num_epochs)
 
 
 #plot the result graph
@@ -222,7 +232,7 @@ ax1.set_ylabel("Loss")
 ax2.set_xlabel("Epochs")
 ax2.set_ylabel("Acc")
 graph = 'train_result_graph_' + '{}-{}-{}_'.format(lr, batch_size, num_epochs) + dt_now + '_aug'  + '.png' 
-plt.savefig(os.path.join("../graph/resnet18_trans", graph))
+plt.savefig(os.path.join("../graph/densenet121_trans_top5", graph))
 
 print()
 print("!!!!!end_to_plot_graph!!!!!")
