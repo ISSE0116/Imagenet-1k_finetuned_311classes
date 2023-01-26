@@ -2,7 +2,7 @@
 ## Abstract
 change the fc layer of the model pre-trained by ImageNet-1k from 1000 classes to 311 classes using finetuing.
 I used this website(pytorch tutorial) as a reference.  
-Be based on https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html  
+This script is based on https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html  
 
 ## Using dataset
 I use ILSVRC2012 downloading from URL: https://www.kaggle.com/c/imagenet-object-localization-challenge
